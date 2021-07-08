@@ -3,8 +3,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <ctype.h>
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 using namespace std;
 
 
@@ -13,6 +16,7 @@ using namespace std;
    string project;
    string version="1.0.0";
    string description;
+
  } details;
 
 
@@ -23,6 +27,7 @@ public:
    char** args;
    int argN;
    string command;
+   fstream spyJSON;
 
    Packager (int ArgN, char** Args) {
      args = Args;
@@ -71,6 +76,10 @@ void Packager::init () {
     else flag=0;
  }
 
+
+ spyJSON.open("spy-package.json", ios::out | ios::in);
+  string entry = "\n{\n\t\"name\":" +details.project+",\n\t\"description\":" +details.description+",\n\t\"version\":" +details.version+",\n\t\"author\":" +details.author+",\n}\n";
+  cout<<entry;
 }
 
 void Packager::cloner () {
