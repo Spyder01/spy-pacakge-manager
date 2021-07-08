@@ -79,7 +79,7 @@ void Packager::init () {
 
  spyJSON.open("spy-package.json", ios::out | ios::in);
   string entry = "\n{\n\t\"name\":" +details.project+",\n\t\"description\":" +details.description+",\n\t\"version\":" +details.version+",\n\t\"author\":" +details.author+",\n}\n";
-  cout<<entry;
+  //cout<<entry;
 }
 
 void Packager::cloner () {
