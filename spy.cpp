@@ -44,7 +44,10 @@ public:
    void init();
    bool exists(const string name);
    void cloner();
-   void ClonePusher(char* Identity);
+   void JSONLoader();
+   void ClonePusher(char* Identity, string section);
+   void depsInstaller();
+   void depsInstallerSectionCloned ();
 
 };
 
@@ -55,6 +58,8 @@ void Packager::checker () {
     init();
   else if(command=="clone")
      cloner();
+  else if(command=="deps")
+     depsInstaller ();
 }
 
 
@@ -105,6 +110,7 @@ bool Packager::exists (const string name) {
 //Function to add outside cloned repositories.
 void Packager::cloner () {
 if(exists("spy-package.json")){
+  JSONLoader ();
   char* Identity = args[2];
   mkdir("spy-Dependencies", 70006);
   chdir("spy-Dependencies");
@@ -120,26 +126,58 @@ try {
  catch(...) {
    exit(0);
  }
- ClonePusher(Identity);
+ chdir("..");
+ chdir("..");
+ ClonePusher(Identity, "cloned");
 
  }
-  else cerr<<"\n ERROR: \"Initiaze Your Project First\"\n";
+  else cerr<<"\n ERROR: \"Initialize Your Project First\"\n";
+}
+
+//Function to load the JSON with spy-package.json
+void Packager::JSONLoader () {
+  ifstream i("spy-package.json");
+  i >> JSON;
 }
 
 //Function to register the cloned repository to spy-package.json
-void Packager::ClonePusher(char* Identity) {
-  chdir("..");
-  chdir("..");
-  ifstream i("spy-package.json");
-  i >> JSON;
-  cout<<JSON.dump(4)<<endl;
-  JSON["dependencies"]["cloned"].push_back(Identity);
+void Packager::ClonePusher(char* Identity, string section) {
+  int flag = 1;
+  for (int i=0; i<JSON["dependencies"][section].size();i++) {
+     if(string(Identity)==JSON["dependencies"][section][i])
+       flag = 0;
+  }
+if(flag) {
+  JSON["dependencies"][section].push_back(Identity);
   ofstream spyJSON;
-  cout<<JSON.dump(4)<<endl;
   spyJSON.open("spy-package.json");
   spyJSON<<JSON.dump(4);
   spyJSON.close();
 }
+
+}
+
+
+//Function to install dependencies from spy-package,json
+void Packager::depsInstaller () {
+   depsInstallerSectionCloned ();
+   //depsInstallerSectionInstalled ("installed");
+}
+
+void Packager::depsInstallerSectionCloned () {
+JSONLoader();
+mkdir("spy-Dependencies", 70006);
+chdir("spy-Dependencies");
+mkdir("cloned", 70007);
+chdir("cloned");
+for(int i=0; i<JSON["dependencies"]["cloned"].size(); i++) {
+    string command = "git clone https://github.com/"+string(JSON["dependencies"]["cloned"][i])+".git";
+    system(command.c_str());
+  }
+chdir("..");
+chdir("..");
+}
+
 
 
 
